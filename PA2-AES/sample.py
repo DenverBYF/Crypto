@@ -33,7 +33,6 @@ def send_data(data,iv,j):
 		tmp=int("0x"+data[(16-j)*2:(16-j)*2+2],16)^j^int("0x"+iv[(16-j)*2:(16-j)*2+2],16)
 		ret.append(chr(tmp))
 		cur.append(int("0x"+data[(16-j)*2:(16-j)*2+2],16)^j)
-		#print "0x"+data[(16-j)*2:(16-j)*2+2]
 		return 1
 	Oracle_Disconnect()
 def main():
