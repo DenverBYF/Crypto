@@ -1,52 +1,9 @@
 <?php 
 
-	/**
-	* 
-	*/
-	class AES
-	{
-		private $key = 'UITN25LMUQC436IM';
-		//private $iv = '4ca00ff4c898d61e1edbf1800618fb28';
-		function __construct()
-		{
-			# code...
-		}
-		public function encrypt($plaintext)
-		{
-
-			$module = mcrypt_module_open(MCRYPT_RIJNDAEL_128,'',MCRYPT_MODE_CBC,'');
-			//$iv=mcrypt_create_iv(mcrypt_enc_get_iv_size($module));
-			mcrypt_generic_init($module,hex2bin($this->key),hex2bin($this->iv));
-			$block = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-			$pad = $block - (strlen($plaintext) % $block);
-			$plaintext .= str_repeat(chr($pad),$pad);
-			$chaintext = mcrypt_generic($module,$plaintext);
-			mcrypt_generic_deinit($module);
-			mcrypt_module_close($module);
-			return $chaintext;
-		}
-		public function decrypt($chaintext)
-		{
-			$module = mcrypt_module_open(MCRYPT_RIJNDAEL_128,'',MCRYPT_MODE_CBC,'');
-			mcrypt_generic_init($module,hex2bin($this->key),hex2bin($this->iv));
-			$plaintext = mcrypt_generic($module,$chaintext);
-			mcrypt_generic_deinit($module);
-			mcrypt_module_close($module);
-			return $plaintext;
-		}
-	}
-
-	/*$aes = new AES();
-	$ret=$aes->encrypt('this is a string will be AES_Encrypt');
-	//echo bin2hex($ret);
-	echo bin2hex($ret);
-	//echo $aes->decrypt(hex2bin('28a226d160dad07883d04e008a7897ee2e4b7465d5290d0c0e6c6822236e1daafb94ffe0c5da05d9476be028ad7c1d81'));
-*/
-
 class CryptAES
 {
     protected $cipher = MCRYPT_RIJNDAEL_128;
-    protected $mode = MCRYPT_MODE_ECB;
+    protected $mode = MCRYPT_MODE_CBC;
     protected $pad_method = NULL;
     protected $secret_key = '';
     protected $iv = '';
@@ -164,14 +121,50 @@ class CryptAES
         return substr($text, 0, -1 * $pad);
     }
 }
- 
-$keyStr = 'UITN25LMUQC436IM';
-$plainText = 'this is a string will be AES_Encrypt';
- 
-$aes = new CryptAES();
-$aes->set_key($keyStr);
-$aes->require_pkcs5();
-$encText = $aes->encrypt($plainText);
-$decString = $aes->decrypt($encText);
- 
-echo $encText,"n",$decString;
+
+/**
+* 
+*/
+class cbc_byte_flipping_attack 
+{
+    protected $ct1;
+    protected $ct2;
+    protected $pt;
+    protected $block_size;
+    function __construct($ct1,$ct2,$pt,$block_size)
+    {
+        $this->ct1 = $ct1;
+        $this->ct2 = $ct2;
+        $this->pt = $pt;
+        $this->block_size = $block_size;
+    }
+    public function find_diff()
+    {
+        $ct1_array = str_split($this->ct1,1);
+        $ct2_array = str_split($this->ct2,1);
+        $diff=[];
+        for ($i=16; $i < count($ct1_array) ; $i++) { 
+            if($ct1_array[$i] != $ct2_array[$i]){
+                $diff[$i] = [$ct1_array[$i],$ct2_array[$i]]; 
+            }
+        }
+        if(empty($diff)){
+            die('no diff');
+        }
+        return $diff;
+    }
+    public function divmod($num1,$num2)
+    {
+        return [intval($num1/$num2),$num1%$num2];
+    }
+    public function attack()
+    {
+        $diff = $this->find_diff();
+        foreach ($diff as $key => $value) {
+            $mod = $this->divmod($key,$this->block_size);
+            $sp = ($mod[0]-1)*$this->block_size+$mod[1];
+            $this->pt[$sp] = chr(ord($this->pt[$sp]) ^ ord($value[0]) ^ ord($value[1]));
+        }
+        return $this->pt;
+    }
+}
