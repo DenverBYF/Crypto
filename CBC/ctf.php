@@ -8,9 +8,7 @@
 	$aes->set_iv('0102030405060708');
 	$aes->require_pkcs5();
 	$encText = $aes->encrypt($plainText);
-	echo $encText."\n";
 	$cookieData = isset($_COOKIE['user'])?$_COOKIE['user']:$encText;
-	//$cookieData = 'ovuXT5DVfRptULIRlUwX8aMvnu7I+DVYrz1njfntKYPtTguqn2Xw/Bc74F/cM1YVgsoE2lEPMUtad6UVuuN0Bw4XOpd2gE0hTc5xuFawSIvz3U98Lzoc+xJ0Ox+118OO';
 	$decString = $aes->decrypt($cookieData);
 	$user = isset($_COOKIE['user'])?$decString:$plainText;
 	$num1 = substr($user,strpos($user,"uid")+4,1);
