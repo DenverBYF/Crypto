@@ -92,6 +92,7 @@ def work_1(M0,M1,M2,M3,rk):
     X[2] = M2
     X[3] = M3
     for i in range(32):
+        print "rk["+str(i)+"]:"+hex(rk[i])[2:].zfill(8)+"   x["+str(i)+"]:"+hex(X[i])[2:].zfill(8)
         X[i+4] = F(X[i], X[i+1], X[i+2], X[i+3], rk[i])
     Y0 = hex(X[35])
     Y1 = hex(X[34])
