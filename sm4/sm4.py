@@ -102,18 +102,20 @@ def work_1(M0,M1,M2,M3,rk):
 def work_2(M0,M1,M2,M3,rk):
     for x in range(1000000):
         if x == 0:
-            X = [0]*36
+            X = []
+            for i in range(36):
+                X.append(0)
             X[0] = M0
             X[1] = M1
             X[2] = M2
             X[3] = M3
         for i in range(32):
             X[i+4] = F(X[i], X[i+1], X[i+2], X[i+3], rk[i])
-    X[0] = X[35]
-    X[1] = X[34]
-    X[2] = X[33]
-    X[3] = X[32]
-    print hex(X[0]), hex(X[1]), hex(X[2]), hex(X[3])
+        X[0] = X[35]
+        X[1] = X[34]
+        X[2] = X[33]
+        X[3] = X[32]
+    print hex(X[0])[2:], hex(X[1])[2:], hex(X[2])[2:], hex(X[3])[2:]
     
         
 def main():
